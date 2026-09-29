@@ -1,37 +1,48 @@
-# TP : Réseaux récurrents pour la prévision météo
+# Recurrent neural networks for weather forecasting
 
-Travaux pratiques de deep learning (PyTorch) : prise en main des RNN, GRU et LSTM, puis prévision de séries temporelles météorologiques mesurées à l'aéroport d'Orly.
+Deep learning lab in PyTorch: from the mechanics of RNN, GRU and LSTM cells to forecasting real weather measurements taken every 3 hours at Orly airport, and a training method that makes multi-step forecasts robust to their own errors.
 
-## Contenu
+![Temperature error of free-running forecasts at 24 h and 45 h](docs/forecast-error.png)
 
-- Rappels sur les RNN simples, déroulement dans le temps, équations et intuition des GRU et LSTM
-- Préparation des données SYNOP (pression, variation de pression, direction et vitesse du vent, température, point de rosée, humidité), une mesure toutes les 3 heures
-- Premier modèle de prévision à un pas et comparaison à la persistance
-- Prévision à long terme (plusieurs pas), modèles plus larges
-- Entraînement amélioré : scheduled sampling avec rétropropagation à travers la génération
+## Highlights
 
-## Principaux résultats
+- **RNN, GRU and LSTM compared** on shapes, states and parameter counts (27, 81 and 108 parameters for the same sizes).
+- **Careful data preparation**: 7 SYNOP variables normalized with training statistics only, sliding windows that skip measurement gaps, and a chronological validation split.
+- **Next-step forecast (3 h)**: a small GRU reduces the error by about 35% compared with persistence, mostly on the daily cycles of temperature and humidity.
+- **Multi-step forecasting**: with teacher forcing, a small model does worse than simply repeating the last observed day from 24 h onwards; more capacity is needed to beat it.
+- **Scheduled sampling with backpropagation through the generation** cuts the free-running error by 15% at equal architecture: **2.5 °C** temperature error at 24 h and **3.1 °C** at 45 h, the best result of the lab.
 
-- Un GRU prédit bien la mesure suivante (3 h) : erreur réduite d'environ 35 % par rapport à la persistance.
-- En prévision à plusieurs pas avec teacher forcing, un petit modèle fait moins bien que la répétition du dernier jour observé dès 24 h ; il faut plus de capacité pour la dépasser.
-- Le scheduled sampling réduit l'erreur en prévision libre de 15 % à architecture égale : environ 2,5 °C d'erreur sur la température à 24 h et 3,1 °C à 45 h.
+## Contents
 
-## Structure
+- Background on simple RNNs, unfolding in time, GRU and LSTM equations
+- Data exploration and normalization, reshaping into sequences of 16 steps (2 days)
+- A first GRU forecaster, compared with the persistence baseline
+- Long-term (free-running) forecasting against persistence and daily persistence
+- Larger and stacked models
+- Improved training: scheduled sampling
 
+## Repository layout
+
+```text
+.
+├── rnn_weather_forecasting.ipynb   # the lab, executed
+├── weather_train.npy               # training data (Orly, 2010 to mid-2020)
+├── weather_test.npy                # test data (mid-2020 to early 2023)
+├── docs/                           # Figures used in this README
+└── requirements.txt
 ```
-ODL_lab_recurrent_meteo_2026.ipynb   notebook du TP (exécuté)
-meteo-train.py.npy                   données d'entraînement
-meteo-test.py.npy                    données de test
-requirements.txt
-```
 
-## Lancer le notebook
+## Run it
 
 ```bash
 pip install -r requirements.txt
-jupyter notebook ODL_lab_recurrent_meteo_2026.ipynb
+jupyter notebook rnn_weather_forecasting.ipynb
 ```
 
-## Données
+## Data
 
-Données SYNOP essentielles de l'OMM (station d'Orly), disponibles en open data sur [OpenDataSoft](https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/information/), filtrées et préparées pour le TP.
+Essential SYNOP data from the World Meteorological Organization (Orly station), available as open data on [OpenDataSoft](https://public.opendatasoft.com/explore/dataset/donnees-synop-essentielles-omm/information/), filtered and prepared for the lab.
+
+## Context
+
+Lab of the deep learning course at Centrale Lille. The lab statement and starter code were provided by the teaching staff; the implementation, experiments and analysis are my own. More on my [portfolio](https://ugo-roccamatisi.github.io).
